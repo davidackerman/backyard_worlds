@@ -123,8 +123,8 @@ Features successfully extracted from 4-frame sequences with varying sizes (resiz
 
 ## Files Added
 
-- `src/backyard_worlds/astronomy/backyard_worlds/motion_features.py`
-- `src/backyard_worlds/astronomy/backyard_worlds/motion_sequence_encoder.py`
+- `src/backyard_worlds/motion_features.py`
+- `src/backyard_worlds/motion_sequence_encoder.py`
 - `configs/pipelines/backyard_worlds_motion.yaml`
 - `test_motion_features.py`
 

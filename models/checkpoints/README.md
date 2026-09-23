@@ -1,7 +1,3 @@
-# Training Checkpoints
+# Checkpoints
 
-This directory contains model checkpoints saved during training.
-
-Files are organized by experiment ID (e.g., `exp001/`, `exp002/`).
-
-Gitignored (too large to commit).
+Gitignored. Training runs write to `checkpoints/temporal_detector/<model>/<model>_run_<timestamp>/`.

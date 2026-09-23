@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-csv_path="/mnt/bigdisk/Programming/mars_astrobio/outputs/crop_inference_2026115_233523_5000_samples/heatmap_peaks.csv"
-subjects_src="/mnt/bigdisk/Programming/mars_astrobio/data/backyard_worlds/subjects"
-selected_dir="/mnt/bigdisk/Programming/mars_astrobio/data/backyard_worlds/subjects_toprand_1000"
-synthetic_dir="/mnt/bigdisk/Programming/mars_astrobio/data/backyard_worlds/synthetic_toprand_1000"
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$REPO"
+
+csv_path="$REPO/outputs/crop_inference_2026115_233523_5000_samples/heatmap_peaks.csv"
+subjects_src="$REPO/data/backyard_worlds/subjects"
+selected_dir="$REPO/data/backyard_worlds/subjects_toprand_1000"
+synthetic_dir="$REPO/data/backyard_worlds/synthetic_toprand_1000"
 
 # Selection settings
 TOP_N=500
@@ -42,7 +45,7 @@ random.seed(seed)
 rand = random.sample(rest, rand_n)
 
 selected = top + rand
-out_path = Path("/mnt/bigdisk/Programming/mars_astrobio/outputs/toprand_1000_subjects.txt")
+out_path = Path("$REPO/outputs/toprand_1000_subjects.txt")
 out_path.write_text("\n".join(selected) + "\n")
 print(f"Wrote {len(selected)} subject_ids -> {out_path}")
 PY
@@ -50,9 +53,9 @@ PY
 mkdir -p "$selected_dir"
 while read -r sid; do
   ln -sfn "$subjects_src/$sid" "$selected_dir/$sid"
-done < /mnt/bigdisk/Programming/mars_astrobio/outputs/toprand_1000_subjects.txt
+done < $REPO/outputs/toprand_1000_subjects.txt
 
-pixi run python /mnt/bigdisk/Programming/mars_astrobio/scripts/generate_synthetic_groundtruth.py \
+pixi run python $REPO/scripts/generate_synthetic_groundtruth.py \
   --background-dir "$selected_dir" \
   --output-dir "$synthetic_dir" \
   --num-sequences $NUM_SEQUENCES \
@@ -67,8 +70,8 @@ pixi run python /mnt/bigdisk/Programming/mars_astrobio/scripts/generate_syntheti
   --min-background-bright-radius $MIN_BRIGHT_RADIUS --max-background-bright-radius $MAX_BRIGHT_RADIUS
 
 nohup pixi run python scripts/train_crop_classifier.py \
-  --data-dir /mnt/bigdisk/Programming/mars_astrobio/data/backyard_worlds/synthetic_toprand_1000 \
-  --annotations-path /mnt/bigdisk/Programming/mars_astrobio/data/backyard_worlds/synthetic_toprand_1000/annotations.json \
+  --data-dir $REPO/data/backyard_worlds/synthetic_toprand_1000 \
+  --annotations-path $REPO/data/backyard_worlds/synthetic_toprand_1000/annotations.json \
   --crop-size 64,64 \
   --samples-per-subject 10 \
   --positive-fraction 0.5 \

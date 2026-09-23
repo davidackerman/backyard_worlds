@@ -310,7 +310,7 @@ def test_dataset():
     """Test the BackyardWorldsTemporalDataset."""
     print("Testing BackyardWorldsTemporalDataset...")
 
-    data_dir = Path("/mnt/bigdisk/Programming/mars_astrobio/data/backyard_worlds/ground_truth")
+    data_dir = Path(__file__).resolve().parents[4] / "data" / "backyard_worlds" / "ground_truth"
     annotations_path = data_dir / "annotations.json"
 
     # Create dataset (no augmentation)

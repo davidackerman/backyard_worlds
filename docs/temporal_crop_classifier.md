@@ -13,10 +13,10 @@ Data strategy
 
 Implementation
 - Dataset: `BackyardWorldsTemporalCropDataset` in
-  `src/backyard_worlds/core/training/datasets/temporal_crop_dataset.py`.
+  `src/backyard_worlds/training/datasets/temporal_crop_dataset.py`.
   It samples crop centers once and reuses them for train/val splits.
 - Model: `TemporalCropClassifier` in
-  `src/backyard_worlds/core/training/models/temporal_crop_classifier.py`.
+  `src/backyard_worlds/training/models/temporal_crop_classifier.py`.
   A small 3D CNN with global pooling and multi-label output.
 - Training: `scripts/train_crop_classifier.py` runs LOOCV and reports micro-F1.
 - Visualization: `scripts/visualize_crop_samples.py` exports crop strips for

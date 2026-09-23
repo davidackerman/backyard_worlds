@@ -56,7 +56,7 @@ scripts/run_toprand_training_pipeline.sh
 Logs and checkpoints go under `logs/temporal_detector/<model>/` and
 `checkpoints/temporal_detector/<model>/`. See [docs/temporal_crop_classifier.md](docs/temporal_crop_classifier.md),
 [docs/temporal_detector_experiments.md](docs/temporal_detector_experiments.md),
-[MOTION_FEATURES_SUMMARY.md](MOTION_FEATURES_SUMMARY.md), and [experiment_notes.md](experiment_notes.md).
+[docs/MOTION_FEATURES_SUMMARY.md](docs/MOTION_FEATURES_SUMMARY.md), and [docs/experiment_notes.md](docs/experiment_notes.md).
 
 Hand-labelled ground truth (GIFs and per-subject frames) is committed under
 `data/backyard_worlds/ground_truth/`.
