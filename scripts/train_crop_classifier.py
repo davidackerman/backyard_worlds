@@ -22,11 +22,11 @@ from torch.utils.data import DataLoader, Subset
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
-from scientific_pipelines.core.training.datasets import (
+from backyard_worlds.training.datasets import (
     BackyardWorldsTemporalCropDataset,
     TemporalSequenceAugmentation,
 )
-from scientific_pipelines.core.training.models import TemporalCropClassifier
+from backyard_worlds.training.models import TemporalCropClassifier
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)

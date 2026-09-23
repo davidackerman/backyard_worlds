@@ -1,362 +1,91 @@
-# Scientific Pipelines: Multi-Domain Unsupervised ML
+# Backyard Worlds: Brown Dwarf and Mover Detection
 
-Unsupervised machine learning pipelines for planetary and astronomical data analysis using self-supervised vision transformers and density-based clustering.
+Automated ranking of brown dwarf and moving-object candidates in Backyard Worlds WISE
+infrared flipbooks, replacing manual Zooniverse classification.
+
+Two approaches live here:
+
+- **Unsupervised pipeline** — encode each flipbook sequence with DINOv3, cluster behaviour with
+  HDBSCAN (stationary stars, fast movers, slow movers), and score candidates on motion,
+  morphology, colour, novelty, and artifacts.
+- **Supervised temporal detector** — 3D/2D CNNs trained on synthetic and hand-labelled ground
+  truth to detect slow movers directly, with crop-level classification and heatmap inference.
 
 **Author**: David Ackerman
 
-**Current Status**: Multi-domain architecture with two operational pipelines:
-1. **Mars CTX Terrain Classification** - Unsupervised clustering of Mars orbital imagery
-2. **Backyard Worlds Brown Dwarf Detection** - Automated candidate ranking from Zooniverse flipbooks
+Split out of the `mars_astrobio` monorepo in September 2026. Siblings: `mars_astrobio`
+(CTX terrain clustering) and `mars_ctx_explorer` (CTX similarity search).
 
-## Overview
-
-This repository implements end-to-end unsupervised ML pipelines for scientific discovery across planetary science and astronomy. Using state-of-the-art self-supervised embeddings (DINOv3) and density-based clustering (HDBSCAN), the pipelines automatically categorize data and identify novel/anomalous regions without human labels.
-
-### Mars CTX Terrain Classification
-
-Automatically cluster Mars Reconnaissance Orbiter Context Camera (CTX) images into terrain categories and identify geologically unique regions:
-
-- **Unsupervised terrain categories** (craters, channels, dunes, plains, etc.)
-- **Novelty detection** for unusual/interesting geological features
-- **No human labels required** - fully automated discovery
-- Processes orbital imagery at ~6 m/pixel resolution
-
-### Backyard Worlds Brown Dwarf Detection
-
-Fully automated AI for ranking brown dwarf candidates in WISE infrared flipbook sequences:
-
-- **Motion analysis** - slow proper motion detection
-- **Multi-factor scoring** - morphology, color, novelty, artifacts
-- **Behavior clustering** - stationary stars, fast movers, slow movers
-- **No citizen labels needed** - replaces manual Zooniverse classification
-
-## Features
-
-### Core Infrastructure
-- **DINOv3 Vision Transformer**: State-of-the-art self-supervised embeddings (768-dim)
-- **HDBSCAN Clustering**: Automatic cluster detection with outlier handling
-- **Novelty Detection**: FAISS-accelerated kNN for fast anomaly scoring
-- **Batch Processing**: Resume-capable pipelines with progress tracking
-- **Multi-Domain**: Unified architecture for planetary and astronomy domains
-
-### Mars CTX Pipeline
-- **Image Tiling**: 256×256 patches with quality filtering (contrast, data fraction)
-- **Unsupervised Clustering**: Automatic terrain categorization
-- **Novelty Scoring**: Identify unique/interesting geological regions
-- **Outputs**: CSV files + Parquet embeddings for downstream analysis
-
-### Backyard Worlds Pipeline
-- **Zooniverse Integration**: Panoptes API for flipbook download
-- **Temporal Encoding**: Motion-aware sequence embeddings
-- **Brown Dwarf Scoring**: Multi-factor heuristics (motion, morphology, color, novelty)
-- **Behavior Clustering**: Automatic classification of object types
-
-### Backyard Worlds Temporal Detector (Ground Truth Training)
-
-Train a small supervised detector on labeled flipbooks (mover/dipole) using one of three model variants:
-- **temporal**: 2D ResNet18 per frame + 3D temporal fusion (default)
-- **framestack**: stack 4 frames into 12 channels for a 2D CNN
-- **diff**: use frame differences (t1-t0, t2-t1, t3-t2) as 9-channel input
-
-### Production Ready
-- **Pixi-managed dependencies**: Reproducible environments
-- **Comprehensive logging**: Track pipeline progress
-- **Resume capability**: Continue interrupted runs
-- **Modular design**: Easy to extend with new pipelines
-
-## Quick Start
-
-### Prerequisites
-
-- [Pixi](https://pixi.sh) package manager
-- CUDA-capable GPU (recommended for training)
-- NASA API key (get one at https://api.nasa.gov/)
-
-### Installation
+## Quick start
 
 ```bash
-# Clone repository
-git clone https://github.com/davidackerman/mars_astrobio.git
-cd mars_astrobio
-
-# Install dependencies with Pixi
 pixi install
-
-# Activate environment
 pixi shell
 
-# Set up NASA API key in .env file (optional, for legacy WATSON pipeline)
-# Open .env and add: NASA_API_KEY=your_actual_key_here
-```
-
-### Usage
-
-#### Mars CTX Terrain Classification
-
-```bash
-# Download CTX images first (writes into data/raw/ctx)
-pixi run ctx-download
-
-# Run full pipeline (assumes CTX images in data/raw/ctx/)
-pixi run ctx-pipeline
-
-# Or use the CLI directly
-ctx-terrain-pipeline --config configs/pipelines/ctx_terrain.yaml --images data/raw/ctx/
-
-# Resume from previous run
-ctx-terrain-pipeline --config configs/pipelines/ctx_terrain.yaml --skip-tiling --skip-embedding
-```
-
-**Outputs** (in `outputs/ctx_terrain/`):
-- `tiles.csv` - Tile metadata with quality metrics
-- `embeddings.parquet` - 768-dim DINOv3 embeddings
-- `tile_clusters.csv` - Cluster assignments and probabilities
-- `tile_novelty.csv` - Novelty scores for unique regions
-
-#### CTX Similar Image Explorer (Click-to-Similar)
-
-```bash
-# 1) Build embeddings + FAISS index for CTX images
-pixi run ctx-build-sim-index
-
-# Recommended for very large CTX TIFFs: chunkwise tiling before embeddings
-pixi run python scripts/build_ctx_retrieval_index.py \
-  --image-dir data/raw/ctx \
-  --index-dir outputs/ctx_similarity \
-  --device cpu \
-  --model-name dinov2_vitb14 \
-  --chunkwise \
-  --tile-size 1024 \
-  --tile-stride 1024
-
-# Optional: custom settings
-pixi run python scripts/build_ctx_retrieval_index.py \
-  --image-dir data/raw/ctx \
-  --index-dir outputs/ctx_similarity \
-  --device cuda \
-  --batch-size 128
-
-# 2) Launch local web app
-pixi run ctx-similarity-app
-```
-
-If you run commands manually in bash, use plain file paths (not markdown links), for example:
-
-```bash
-pixi run python scripts/build_ctx_retrieval_index.py --image-dir data/raw/ctx --index-dir outputs/ctx_similarity --device cpu --model-name dinov2_vitb14
-```
-
-**Artifacts** (in `outputs/ctx_similarity/`):
-- `embeddings.parquet` - Image embeddings
-- `faiss.index` - Similarity search index
-- `metadata.parquet` - Image metadata + row IDs
-
-The app supports sidebar filtering by image path text, sol range (when solvable from filenames/paths),
-and source folder. If you already built an older index, rebuild once so `metadata.parquet` includes
-the new metadata columns.
-
-If CTX `manifest.json` is present near your image directory (or passed explicitly with `--manifest`),
-the indexer also joins `center_lon`/`center_lat` so the app can filter by geographic region.
-
-#### Backyard Worlds Brown Dwarf Detection
-
-```bash
-# Run full pipeline (downloads from Zooniverse)
+# Unsupervised pipeline (downloads subjects from Zooniverse)
 pixi run backyard-worlds
 
-# Or use the CLI directly
-backyard-worlds-pipeline --config configs/pipelines/backyard_worlds.yaml
-
-# With authentication for higher rate limits
+# With Zooniverse credentials for higher rate limits
 backyard-worlds-pipeline --config configs/pipelines/backyard_worlds.yaml \
   --username myuser --password mypass
 
-# Resume from previous run
+# Resume from an earlier run
 backyard-worlds-pipeline --config configs/pipelines/backyard_worlds.yaml --skip-download --skip-encoding
 ```
 
-**Outputs** (in `outputs/backyard_worlds/`):
-- `subjects.csv` - Subject metadata
-- `embeddings.parquet` - 2304-dim sequence embeddings
-- `subject_clusters.csv` - Behavior cluster assignments
-- `brown_dwarf_ranking.csv` - Ranked candidates by score
+Outputs land in `outputs/backyard_worlds/`:
 
-#### Backyard Worlds Temporal Detector Training
+- `subjects.csv` — subject metadata
+- `embeddings.parquet` — 2304-dim sequence embeddings
+- `subject_clusters.csv` — behaviour cluster assignments
+- `brown_dwarf_ranking.csv` — ranked candidates
 
-```bash
-# Default temporal model
-pixi run python scripts/train_temporal_detector.py --model temporal
-
-# Frame-stack 2D CNN
-pixi run python scripts/train_temporal_detector.py --model framestack
-
-# Difference-stream 2D CNN
-pixi run python scripts/train_temporal_detector.py --model diff
-```
-
-Logs and checkpoints are grouped by model type:
-- `logs/temporal_detector/<model>/<model>_run_YYYYMMDD_HHMMSS/`
-- `checkpoints/temporal_detector/<model>/<model>_run_YYYYMMDD_HHMMSS/`
-
-Augmentation options (examples):
-```bash
-# Threshold low-intensity pixels before noise/blur
-pixi run python scripts/train_temporal_detector.py --model temporal --threshold-low --threshold-value 125
-
-# Add adaptive noise + denoise
-pixi run python scripts/train_temporal_detector.py --model temporal --noise-prob 0.6 --adaptive-noise --denoise --denoise-prob 0.2
-```
-
-#### Legacy WATSON Pipeline
+## Temporal detector training
 
 ```bash
-# Original WATSON texture classification (still supported)
-pixi run download-watson
-pixi run train
+# Default temporal model; also --model framestack or --model diff
+pixi run train-temporal-detector --model temporal
+
+# Crop classifier on ground-truth subjects
+pixi run train-crop-classifier --help
+
+# Full "top-random 1000" training pipeline
+scripts/run_toprand_training_pipeline.sh
 ```
 
-## Project Structure
+Logs and checkpoints go under `logs/temporal_detector/<model>/` and
+`checkpoints/temporal_detector/<model>/`. See [docs/temporal_crop_classifier.md](docs/temporal_crop_classifier.md),
+[docs/temporal_detector_experiments.md](docs/temporal_detector_experiments.md),
+[MOTION_FEATURES_SUMMARY.md](MOTION_FEATURES_SUMMARY.md), and [experiment_notes.md](experiment_notes.md).
+
+Hand-labelled ground truth (GIFs and per-subject frames) is committed under
+`data/backyard_worlds/ground_truth/`.
+
+## Layout
 
 ```
-scientific_pipelines/
-├── src/scientific_pipelines/  # Main package
-│   ├── core/                  # Shared infrastructure
-│   │   ├── embeddings/        # DINOv3, SimCLR extractors
-│   │   ├── clustering/        # HDBSCAN, novelty detection
-│   │   ├── data/              # Base dataset classes
-│   │   ├── training/          # Training infrastructure
-│   │   └── utils/             # Config, logging
-│   ├── planetary/mars/        # Planetary science domain
-│   │   ├── watson/            # WATSON texture classification (legacy)
-│   │   └── ctx/               # CTX terrain classification
-│   │       ├── tiling.py      # Image tiling with quality filters
-│   │       ├── pipeline.py    # End-to-end orchestration
-│   │       └── scripts.py     # CLI entry point
-│   └── astronomy/             # Astronomy domain
-│       └── backyard_worlds/   # Brown dwarf detection
-│           ├── downloader.py  # Panoptes API integration
-│           ├── sequence_encoder.py  # Flipbook encoding
-│           ├── brown_dwarf_scorer.py  # Multi-factor scoring
-│           ├── pipeline.py    # End-to-end orchestration
-│           └── scripts.py     # CLI entry point
-├── configs/pipelines/         # Pipeline configurations
-│   ├── ctx_terrain.yaml       # CTX configuration
-│   └── backyard_worlds.yaml   # Backyard Worlds configuration
-├── notebooks/                 # Jupyter notebooks for exploration
-├── tests/                     # Unit and integration tests
-├── data/                      # Downloaded and processed data (gitignored)
-├── outputs/                   # Pipeline outputs (gitignored)
-└── models/                    # Trained models (gitignored)
+src/backyard_worlds/
+├── embeddings/              # DINOv3 extractors, batched embedding pipeline
+├── clustering/              # HDBSCAN clusterer, FAISS novelty detector
+├── training/                # Datasets, augmentation, losses, metrics, CNN models
+├── downloader.py            # Panoptes API integration
+├── sequence_encoder.py, motion_sequence_encoder.py, motion_features.py
+├── brown_dwarf_scorer.py, moving_object_scorer.py
+├── pipeline.py              # End-to-end orchestration
+└── scripts.py               # `backyard-worlds-pipeline` CLI
+configs/pipelines/backyard_worlds*.yaml
+configs/training/temporal_detector.yaml
+scripts/                     # download, synthetic GT, training, inference, overlays, baselines
 ```
-
-
-## Scientific Background
-
-### Target Features
-
-The system focuses on detecting micro-textures associated with potential biosignatures:
-
-1. **Laminations**: Fine-scale layering in sedimentary rocks, potentially indicating cyclical depositional processes
-2. **Micro-porosity**: Small voids and cavities that could have hosted microbial communities
-3. **Redox Features**: Iron oxide halos and color variations suggesting redox boundaries
-4. **Alteration Zones**: Chemically altered regions like the "leopard spots" in Cheyava Falls
-
-### Known Biosignature Sites
-
-Training data includes labeled examples from:
-- **Cheyava Falls** (Sol 1174): Leopard-spot patterns with organic signatures and redox minerals
-- **Wildcat Ridge** (Sol 528): Strongest organic detection in Jezero Crater
-- **Delta deposits**: Sedimentary structures in the ancient river delta
 
 ## Development
 
-### Setting Up Development Environment
-
 ```bash
-# Install with dev dependencies
-pixi install
-
-# Install pre-commit hooks
-pixi run pre-commit install
-
-# Run tests
 pixi run test
-
-# Format code
-pixi run format
-
-# Lint code
 pixi run lint
-
-# Type check
-pixi run typecheck
+pixi run format
 ```
-
-### Running Tests
-
-```bash
-# All tests
-pixi run test
-
-# Specific test file
-pytest tests/unit/test_pds_client.py -v
-
-# With coverage report
-pytest --cov=mars_biosig --cov-report=html
-```
-
-## Data Access
-
-### NASA PDS Data Sources
-
-- **PDS Geosciences Node**: https://pds-geosciences.wustl.edu/missions/mars2020/
-- **Mars Photos API**: https://api.nasa.gov/mars-photos/api/v1
-- **WATSON Camera**: Perseverance rover's micro-imager instrument
-
-### Instruments
-
-- **WATSON** (Wide Angle Topographic Sensor for Operations and eNgineering): High-resolution micro-imaging camera
-- **SHERLOC** (Future): Raman spectroscopy for molecular composition
-- **PIXL** (Future): X-ray fluorescence for elemental mapping
-
-## Roadmap
-
-- [x] Phase 1: Foundation - Repository structure and configuration
-- [x] Phase 2: Data Pipeline - PDS client and WATSON downloader (**Currently Complete**)
-- [ ] Phase 3: Model Architecture - Texture CNN baseline
-- [ ] Phase 4: Training Pipeline - Training loop and evaluation
-- [ ] Phase 5: Inference & Analysis - Mission-wide scanning
-- [ ] Phase 6: Multi-Modal Integration - SHERLOC + PIXL fusion
-
-## Contributing
-
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## Citation
-
-If you use this code in your research, please cite:
-
-```bibtex
-@software{mars_biosig2025,
-  title = {Mars Rover Biosignature Detection},
-  author = {Ackerman, David},
-  year = {2025},
-  url = {https://github.com/davidackerman/mars_astrobio}
-}
-```
-
-## Related Work
-
-- Cheyava Falls biosignature discovery: [Nature 2025](https://www.nature.com/articles/s41586-025-09413-0)
-- Mars 2020 Mission: [NASA JPL](https://mars.nasa.gov/mars2020/)
-- WATSON Camera: [Malin Space Science Systems](https://www.msss.com/)
 
 ## License
 
-BSD 3-Clause License - see [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- NASA JPL Mars 2020 Mission team
-- PDS Geosciences Node for data access
-- ChatGPT for initial project planning and scientific context
+BSD-3-Clause. See [LICENSE](LICENSE).

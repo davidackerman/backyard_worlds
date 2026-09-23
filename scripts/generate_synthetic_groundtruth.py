@@ -23,7 +23,7 @@ import colorsys
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from scientific_pipelines.core.training.datasets.crop_config import crop_bounds
+from backyard_worlds.training.datasets.crop_config import crop_bounds
 
 
 def list_subject_dirs(root: Path) -> List[Path]:

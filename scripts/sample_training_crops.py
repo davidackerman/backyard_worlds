@@ -16,8 +16,8 @@ import torch
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from scientific_pipelines.core.training.datasets import TemporalSequenceAugmentation
-from scientific_pipelines.core.training.datasets.temporal_crop_dataset import (
+from backyard_worlds.training.datasets import TemporalSequenceAugmentation
+from backyard_worlds.training.datasets.temporal_crop_dataset import (
     BackyardWorldsTemporalCropDataset,
 )
 

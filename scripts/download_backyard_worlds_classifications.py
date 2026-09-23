@@ -27,7 +27,7 @@ import pandas as pd
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from scientific_pipelines.astronomy.backyard_worlds import BackyardWorldsDownloader
+from backyard_worlds import BackyardWorldsDownloader
 
 # Configure logging
 logging.basicConfig(

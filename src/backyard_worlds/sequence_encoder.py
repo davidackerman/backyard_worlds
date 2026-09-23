@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from PIL import Image
 
-from scientific_pipelines.core.embeddings import DINOv3Extractor
+from backyard_worlds.embeddings import DINOv3Extractor
 
 logger = logging.getLogger(__name__)
 

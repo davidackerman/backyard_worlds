@@ -11,8 +11,8 @@ import torch
 import torch.nn.functional as F
 from PIL import Image, ImageDraw
 
-from scientific_pipelines.core.training.models import TemporalObjectDetector
-from scientific_pipelines.core.training.datasets import BackyardWorldsTemporalDataset
+from backyard_worlds.training.models import TemporalObjectDetector
+from backyard_worlds.training.datasets import BackyardWorldsTemporalDataset
 
 
 def save_heatmap_image(heatmap: torch.Tensor, path: Path) -> None:

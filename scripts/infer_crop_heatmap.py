@@ -17,9 +17,9 @@ import torch
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
-from scientific_pipelines.core.training.models import TemporalCropClassifier
-from scientific_pipelines.core.training.datasets.augmentation import TemporalSequenceAugmentation
-from scientific_pipelines.core.training.datasets.crop_config import crop_bounds, crop_frames
+from backyard_worlds.training.models import TemporalCropClassifier
+from backyard_worlds.training.datasets.augmentation import TemporalSequenceAugmentation
+from backyard_worlds.training.datasets.crop_config import crop_bounds, crop_frames
 
 _WORKER_MODEL = None
 _WORKER_CONFIG = None

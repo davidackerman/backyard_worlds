@@ -4,7 +4,7 @@
 
 - `scripts/infer_crop_heatmap.py`: accepts `--data-dir` pointing directly at a subjects folder; GIF duration slowed and written via `imageio.get_writer`; output files now prepend peak heatmap score; writes `heatmap_peaks.csv` sorted by peak score.
 - `scripts/generate_synthetic_groundtruth.py`: added mover size controls (`--min-mover-radius`, `--max-mover-radius`); added blinkers (stationary on/off bright spots) with size controls; background bright add-ons default off (`--background-bright-prob 0.0`).
-- `src/scientific_pipelines/core/training/datasets/temporal_crop_dataset.py`: added bright-negative sampling for background crops.
+- `src/backyard_worlds/core/training/datasets/temporal_crop_dataset.py`: added bright-negative sampling for background crops.
 - `scripts/train_crop_classifier.py`: added CLI flags to control bright-negative sampling.
 - `scripts/sample_training_crops.py`: new utility to save training crops as GIFs grouped by category.
 

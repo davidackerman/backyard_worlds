@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from scientific_pipelines.core.clustering import HDBSCANClusterer
-from scientific_pipelines.core.embeddings import DINOv3Extractor
+from backyard_worlds.clustering import HDBSCANClusterer
+from backyard_worlds.embeddings import DINOv3Extractor
 
 from .brown_dwarf_scorer import BrownDwarfScorer
 from .downloader import BackyardWorldsDownloader
@@ -290,7 +290,7 @@ class BackyardWorldsPipeline:
 
         # Initialize scorer based on type
         if scorer_type == "moving_object":
-            from scientific_pipelines.core.clustering import NoveltyDetector
+            from backyard_worlds.clustering import NoveltyDetector
 
             from .moving_object_scorer import MovingObjectScorer
 

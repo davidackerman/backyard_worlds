@@ -26,17 +26,17 @@ import torchvision
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
-from scientific_pipelines.core.training.models import (
+from backyard_worlds.training.models import (
     TemporalObjectDetector,
     FrameStackObjectDetector,
     DiffStreamObjectDetector,
 )
-from scientific_pipelines.core.training.losses import DetectionLoss
-from scientific_pipelines.core.training.datasets import (
+from backyard_worlds.training.losses import DetectionLoss
+from backyard_worlds.training.datasets import (
     BackyardWorldsTemporalDataset,
     TemporalSequenceAugmentation,
 )
-from scientific_pipelines.core.training.metrics import DetectionMetrics
+from backyard_worlds.training.metrics import DetectionMetrics
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
