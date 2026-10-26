@@ -16,6 +16,10 @@ Two approaches live here:
 Split out of the `mars_astrobio` monorepo in September 2026. Siblings: `mars_astrobio`
 (CTX terrain clustering) and `mars_ctx_explorer` (CTX similarity search).
 
+![Two WISE flipbooks looping, with circles on the moving objects the motion pipeline found](docs/images/motion-ranking-top.webp)
+
+*Ranks 2 and 3 of 1,000 public Zooniverse flipbooks from the motion pipeline (configs/pipelines/backyard_worlds_motion.yaml). Circles mark where scripts/render_motion_overlays.py found motion.*
+
 ## Quick start
 
 ```bash
